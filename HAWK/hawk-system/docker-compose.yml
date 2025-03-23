@@ -5,30 +5,27 @@ services:
     build: ./romashka
     depends_on:
       - volan
-    networks:
-      - kollektiv_net
 
+  repair:
+    build: ./repair
+    depends_on:
+      - volan
+
+  security:
+    build: ./security
+    depends_on:
+      - volan
+      
   volan:
     build: ./volan
     depends_on:
       - grif
-    networks:
-      - kollektiv_net
 
   grif:
     build: ./grif
     depends_on:
       - kollektiv
-    networks:
-      - kollektiv_net
-
   kollektiv:
     build: ./kollektiv
     ports:
       - "8002:8002"
-    networks:
-      - kollektiv_net
-
-networks:
-  kollektiv_net:
-    driver: bridge

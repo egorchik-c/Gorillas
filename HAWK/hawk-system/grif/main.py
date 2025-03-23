@@ -1,6 +1,9 @@
 from flask import Flask, request
 import requests
 import logging
+import time
+
+time.sleep(3)
 
 app = Flask(__name__)
 
@@ -22,7 +25,6 @@ def process_event():
         return kollektiv_data.json(), kollektiv_data.status_code
     except requests.ConnectionError:
         print("[Гриф] Коллектив недоступен", flush=True)
-        return {"error": "Коллектив недоступен"}, 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8001)

@@ -1,6 +1,9 @@
 from flask import Flask, request
 import requests
 import logging
+import time
+
+time.sleep(4)
 
 app = Flask(__name__)
 
@@ -8,7 +11,6 @@ log = logging.getLogger("werkzeug")
 log.setLevel(logging.ERROR)
 
 @app.route("/log", methods=["POST"])
-
 def receive_logs():
     data = request.json
     print(f"[Коллектив] Принял отчет: {data["message"]}", flush=True)
