@@ -19,7 +19,7 @@ def fix():
 
     print(f"[Ремонтная система] Ремонт завершен", flush=True)
 
-    return {"status": "Ремонт готов"}
+    return {"status": "Ремонт готов"}, 200
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8003)

@@ -17,14 +17,21 @@ def process_event():
     data = request.json
     print(f"[Гриф] Принял: {data["message"]}")
 
-    grif_log = {"source": "Гриф", "message": data["message"]}
+    command = data.get("message")
 
-    try:
-        kollektiv_data = requests.post(KOLLEKTIV_URL, json=grif_log)
-        print(f"[Гриф] Отправлено в Коллектив: {grif_log}", flush=True)
-        return kollektiv_data.json(), kollektiv_data.status_code
-    except requests.ConnectionError:
-        print("[Гриф] Коллектив недоступен", flush=True)
+    if command == "reboot":
+        print(f"[Гриф] Перезаргрузка на 15 сек, ожидайте...", flush=True)
+        time.sleep(15)
+        print(f"[Гриф] Возобновление работы системы", flush=True)
+    elif command == "Отключение питания Ветролова":
+        print("[Гриф] Система без питаня", flush=True)
+        
+    kollektiv_data = requests.post(KOLLEKTIV_URL, json=data)
+    print(f"[Гриф] Отправлено в Коллектив: {data["message"]}", flush=True)
+
+    return kollektiv_data.json(), kollektiv_data.status_code
+    # except requests.ConnectionError:
+    #     print("[Гриф] Коллектив недоступен", flush=True)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8001)

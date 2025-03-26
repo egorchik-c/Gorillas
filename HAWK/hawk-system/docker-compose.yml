@@ -21,6 +21,22 @@ services:
     depends_on:
       - grif
 
+  diagnostic:
+    build: ./diagnostic
+    depends_on:
+      - grif
+
+  vetrolov:
+    build: ./vetrolov
+    depends_on:
+      - diagnostic
+      
+  terminal:
+    build: ./terminal
+    depends_on:
+      - grif
+      - vetrolov
+
   grif:
     build: ./grif
     depends_on:
