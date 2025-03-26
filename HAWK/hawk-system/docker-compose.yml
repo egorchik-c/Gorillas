@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  romashka:
+    build: ./romashka
+    depends_on:
+      - volan
+
+  repair:
+    build: ./repair
+    depends_on:
+      - volan
+
+  security:
+    build: ./security
+    depends_on:
+      - volan
+      
+  volan:
+    build: ./volan
+    depends_on:
+      - grif
+
+  diagnostic:
+    build: ./diagnostic
+    depends_on:
+      - grif
+
+  vetrolov:
+    build: ./vetrolov
+    depends_on:
+      - diagnostic
+      
+  terminal:
+    build: ./terminal
+    depends_on:
+      - grif
+      - vetrolov
+
+  grif:
+    build: ./grif
+    depends_on:
+      - kollektiv
+  kollektiv:
+    build: ./kollektiv
+    ports:
+      - "8002:8002"
