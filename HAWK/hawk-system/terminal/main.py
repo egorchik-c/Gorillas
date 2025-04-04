@@ -13,12 +13,12 @@ def command_event():
         if rand == 3:
             rand_ = bool(random.getrandbits(1))
             if rand_:
-                command_data = {"message": "reboot" }
+                command_data = {"message": "reboot"}
                 response = requests.post(GRIF_URL, json=command_data)
         
                 print(f"[Терминал управления] Приказ отправлен в Гриф: {command_data}", flush=True)
             else:
-                command_data = {"message": "power_off" }
+                command_data = {"message": "power_off"}
                 response = requests.post(VETROLOV_URL, json=command_data)
         
                 print(f"[Терминал управления] Приказ отправлен в Ветролов: {command_data}", flush=True)

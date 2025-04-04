@@ -20,7 +20,7 @@ def process_event():
     command = data.get("message")
 
     if command == "reboot":
-        print(f"[Гриф] Перезаргрузка на 15 сек, ожидайте...", flush=True)
+        print(f"[Гриф] Перезагрузка на 15 сек, ожидайте...", flush=True)
         time.sleep(15)
         print(f"[Гриф] Возобновление работы системы", flush=True)
     elif command == "Отключение питания Ветролова":
