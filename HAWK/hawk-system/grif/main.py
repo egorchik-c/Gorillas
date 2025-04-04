@@ -29,7 +29,7 @@ def process_event():
     kollektiv_data = requests.post(KOLLEKTIV_URL, json=data)
     print(f"[Гриф] Отправлено в Коллектив: {data["message"]}", flush=True)
 
-    return kollektiv_data.json(), kollektiv_data.status_code
+    return data, kollektiv_data.status_code
     # except requests.ConnectionError:
     #     print("[Гриф] Коллектив недоступен", flush=True)
 

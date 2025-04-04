@@ -29,7 +29,7 @@ def diagnostic_event():
 
 def send_to_grif(message):
     grif_data = requests.post(GRIF_URL, json={"source": "Диагностика", "message": message})
-    print(f"[Диагностика] Отправлено в гриф {grif_data.json}", flush=True)
+    print(f"[Диагностика] Отправлено в гриф {message}", flush=True)
 
 
 if __name__ == "__main__":

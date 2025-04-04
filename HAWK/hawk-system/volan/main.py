@@ -39,6 +39,7 @@ def send_to_grif(message):
     grif_data = requests.post(GRIF_URL, json={"source": "Волан", "message": message})
     log = grif_data.json()
     print(f"[Волан] Отправлено в гриф {message}", flush=True)
+    return {"message": message}, 200
 
 def send_to_security(message):
     sec_data = requests.post(SECURITY_URL, json=message)
