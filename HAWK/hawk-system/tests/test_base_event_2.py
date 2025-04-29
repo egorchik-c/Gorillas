@@ -1,6 +1,11 @@
 import pytest
 import requests
 from unittest.mock import patch
+from volan.main import app as app_v
+from grif.main import app as app_g
+from kollektiv.main import app as app_k
+from vetrolov.main import app as app_vetr
+from diagnostic.main import app as app_d
 
 VOLAN_URL = "http://localhost:8000/motion"
 GRIF_URL = "http://localhost:8001/process"
@@ -16,6 +21,25 @@ class MockResponse:
     def json(self):
         return self.json_data
     
+@pytest.fixture
+def volan_client():
+    return app_v.test_client()
+
+@pytest.fixture
+def grif_client():
+    return app_g.test_client()
+
+@pytest.fixture
+def kollektiv_client():
+    return app_k.test_client()
+
+@pytest.fixture
+def vetrolov_client():
+    return app_vetr.test_client()
+
+@pytest.fixture
+def diagnostic_client():
+    return app_d.test_client()
 
 @pytest.fixture
 def mock_reboot():
@@ -47,25 +71,22 @@ def mock_power_off():
         mock_post.side_effect = side_effect
         yield mock_post
 
-def test_reboot(mock_reboot):
-    to_grif = requests.post(GRIF_URL, {"message": "reboot" })
-    grif_log = to_grif.json()
+def test_reboot(mock_reboot, grif_client, kollektiv_client):
+    to_grif = grif_client.post(GRIF_URL, json={"message": "reboot"})
+    to_kollektiv = kollektiv_client.post(KOLLEKTIV_URL, json={"message": "reboot"})
+
     assert to_grif.status_code == 200
-
-    to_kollektiv = requests.post(KOLLEKTIV_URL, grif_log["message"])
     assert to_kollektiv.status_code == 200
-    assert to_kollektiv.json() == {"status": "reboot"}
+    assert to_kollektiv.json == {"status": "reboot"}
 
-def test_power_off(mock_power_off):
-    to_vetrolov = requests.post(VETROLOV_URL, json={"message": "power_off"})
+def test_power_off(mock_power_off, vetrolov_client, diagnostic_client, grif_client, kollektiv_client):
+    to_vetrolov = vetrolov_client.post(VETROLOV_URL, json={"message": "power_off"})
+    to_diagnostic = diagnostic_client.post(DIAG_URL, json={"message": "power_off"})
+    to_grif = grif_client.post(GRIF_URL, json={"source": "Диагностика", "message": "Отключение питания Ветролова"})
+    to_kollektiv = kollektiv_client.post(KOLLEKTIV_URL, json={"source": "Диагностика", "message": "Отключение питания Ветролова"})
+    
     assert to_vetrolov.status_code == 200
-
-    to_diagnostic = requests.post(DIAG_URL, json={"message": "power_off"})
     assert to_diagnostic.status_code == 200
-
-    to_grif = requests.post(GRIF_URL, json={"source": "Диагностика", "message": "Отключение питания Ветролова"})
     assert to_grif.status_code == 200
-
-    to_kollektiv = requests.post(KOLLEKTIV_URL, json={"source": "Диагностика", "message": "Отключение питания Ветролова"})
     assert to_kollektiv.status_code == 200
-    assert to_kollektiv.json() == {"status": "Отключение питания Ветролова"}
+    assert to_kollektiv.json == {"status": "Отключение питания Ветролова"}
