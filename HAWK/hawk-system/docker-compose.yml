@@ -31,9 +31,26 @@ services:
         sleep 20
         python start.py /shared/config.ini
     container_name: video-service
+    environment:
+      - MODULE_NAME=video-service
     volumes:
-      - ./shared/config.ini:/module/shared/config.ini
+      - ./shared:/shared
     ports:
       - 8000:8000
 
-  
+  # data-collector:
+  #   build: ./romashka/data-collector
+  #   entrypoint:
+  #       - bash
+  #       - -c
+  #       - |
+  #         echo 'Giving Kafka a bit of time to start up…'
+  #         sleep 20
+  #         python start.py /shared/config.ini
+  #   volumes:
+  #       - ./shared/config.ini:/module/shared/config.ini
+  #   ports:
+  #     - 8001:8001
+  #   depends_on:
+  #     - video-service
+    

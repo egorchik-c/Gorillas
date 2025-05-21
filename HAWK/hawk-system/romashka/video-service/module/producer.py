@@ -1,36 +1,65 @@
 import os
 import json
-import configparser
+import multiprocessing
+import threading
+
+from uuid  import uuid4
 from confluent_kafka import Producer
+from random import getrandbits
+from time import sleep
 
-class VideoProducer:
-    def __init__(self, config_path='./shared/config.ini' ):
-        config = configparser.ConfigParser()
-        config.read(config_path)
+MODULE_NAME: str = os.getenv("MODULE_NAME")
+requests_queue: multiprocessing.Queue = None
 
-        self.conf = {
-            'bootstrap.servers': config.get("default", "bootstrap.servers"),
-            # 'auto.offset.reset': config.get("default", "auto.offset.reset")
+def get_video():
+    while True:
+        sample_video = {
+            "motion_detected": bool(getrandbits(1)),
+            "video-file": "some video"
         }
 
-        self.producer = Producer(self.conf)
-        self.topic = 'video'
-    
-    def delivery_report(self, err, msg):
+        print(f"[{MODULE_NAME}] Видео для отправки : {sample_video}")
+
+        proceed_to_deliver(uuid4().__str__(), {
+            "deliver_to": "nav",
+            "operation": "set_ins_coords",
+            "video": sample_video
+        })
+
+        # sleep(10)
+
+def proceed_to_deliver(id, details):
+    details["id"] = id
+    details["source"] = MODULE_NAME
+    requests_queue.put(details)
+
+def producer_job(_, config, request_queue: multiprocessing.Queue):
+    producer = Producer(config)
+
+    threading.Thread(target=get_video).start()
+    def delivery_callback(err, msg):
         if err:
-            print("[error] Message failed delivery: {}".format(err))
+            print(f"[video-service] Message failed delivery: {err}")
 
-    def send_video(self, video_data):
-        try:
-            self.producer.produce(
-                topic=self.topic,
-                value=json.dumps(video_data),
-                callback=self.delivery_report
-            )
-            self.producer.flush()
-            print(f"[Video-service] Sent video: {video_data}")
-            
-        except Exception as e:
-            print(f"[Video-service] Error sending video: {e}")
-        
+    topic = "monitor"
+    while True:
+        event_details = request_queue.get()
+        producer.produce(
+            topic,
+            json.dumps(event_details),
+            callback=delivery_callback
+        )
+        producer.poll(10000)
+        producer.flush()
+        print(f"[{MODULE_NAME}] Sent video: {event_details}")
 
+def start_producer(args, config, request_queue):
+    print(f"[{MODULE_NAME}] Producer started...")
+
+    global requests_queue
+
+    requests_queue = request_queue
+
+    threading.Thread(
+        target=lambda: producer_job(args, config, request_queue)
+    ).start()
