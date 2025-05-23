@@ -11,22 +11,6 @@ from time import sleep
 MODULE_NAME: str = os.getenv("MODULE_NAME")
 requests_queue: multiprocessing.Queue = None
 
-def get_video():
-    while True:
-        sample_video = {
-            "video-file": "some video"
-        }
-
-        print(f"[{MODULE_NAME}] Video to sending: {sample_video}")
-
-        proceed_to_deliver(uuid4().__str__(), {
-            "deliver_to": "data-collector",
-            "operation": "send_video",
-            "video": sample_video
-        })
-
-        sleep(10)
-
 def proceed_to_deliver(id, details):
     details["id"] = id
     details["source"] = MODULE_NAME
@@ -35,10 +19,11 @@ def proceed_to_deliver(id, details):
 def producer_job(_, config, request_queue: multiprocessing.Queue):
     producer = Producer(config)
 
-    threading.Thread(target=get_video).start()
+    # threading.Thread(target=get_telemetry).start()
+
     def delivery_callback(err, msg):
         if err:
-            print(f"[video-service] Message failed delivery: {err}")
+            print(f"[{MODULE_NAME}] Message failed delivery: {err}")
 
     topic = "monitor"
     while True:
@@ -51,7 +36,7 @@ def producer_job(_, config, request_queue: multiprocessing.Queue):
         )
         producer.poll(15000)
         producer.flush()
-        print(f"[{MODULE_NAME}] Send video: {event_details}")
+        print(f"[{MODULE_NAME}] Send collect data: {event_details}")
 
 def start_producer(args, config, request_queue):
     print(f"[{MODULE_NAME}] Producer started...")
